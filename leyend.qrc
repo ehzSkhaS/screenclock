@@ -4,5 +4,12 @@
         <file alias="b_led_16">files/black16x16.svg</file>
         <file alias="g_led">files/green.svg</file>
         <file alias="b_led">files/black.svg</file>
+        <file alias="logo">files/logo.png</file>
+        <file alias="logo16">files/logo_16.ico</file>
+        <file alias="logo24">files/logo_24.ico</file>
+        <file alias="logo32">files/logo_32.ico</file>
+        <file alias="logo48">files/logo_48.ico</file>
+        <file alias="logo64">files/logo_64.ico</file>
+        <file alias="logo96">files/logo_96.ico</file>
     </qresource>
 </RCC>

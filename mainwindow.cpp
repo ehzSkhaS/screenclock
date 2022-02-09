@@ -1,7 +1,12 @@
+#include <QtMath>
 #include <QTimer>
 #include <QTime>
+#include <QProcess>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,42 +20,9 @@ MainWindow::MainWindow(QWidget *parent)
             &QTimer::timeout,
             this,
             &MainWindow::updateTime);
-    timer->start(10);        
+    timer->start(10);
 
-    int h = this->geometry().height();
-    int w = this->geometry().width();
-    double r = w/4.5;
-    double a = w/2;
-    double b = h/2;
-    double s_rad = 6 * M_PI /180;            
-
-    double l_w = w/2.9;
-    double l_h = h/2.9;
-
-    ui->lcd_time->setGeometry(w/2-l_w/2,h/2-l_h/2,l_w,l_h);
-
-    for(int i=0; i<60; i++)
-        if(i>=15)
-            get_sec(i)->setGeometry(a + r * cos(s_rad * (i-15)) - 8, b + r * sin(s_rad * (i-15)) - 8, 16, 16);
-        else            
-            get_sec(i)->setGeometry(a + r * cos(s_rad * (i + 45)) - 8, b + r * sin(s_rad * (i + 45)) - 8, 16, 16);
-
-    for(int i=0; i<12; i++)
-        if(i>=3)
-            get_min(i)->setGeometry(a + (r + r/8) * cos(s_rad * (i-3) * 5) - 8, b + (r + r/8) * sin(s_rad * (i-3) * 5) - 8, 16, 16);
-        else
-            get_min(i)->setGeometry(a + (r + r/8) * cos(s_rad * (i+9) * 5) - 8, b + (r + r/8) * sin(s_rad * (i+9) * 5) - 8, 16, 16);
-
-    QTime currentTime = QTime::currentTime();
-    /*
-    for(int i = 11; i > (int)currentTime.minute()/5; i--)
-        get_min(i)->hide();
-    */
-
-    for(int i = 59; i >= currentTime.second(); i--)
-        if(i!=0)
-            get_sec(i)->hide();
-
+    applyGeometry(this->geometry().width(), this->geometry().height());    
     updateTime();
 }
 
@@ -59,7 +31,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QLabel * MainWindow::get_sec(int pos)
+QLabel * MainWindow::getSec(int pos)
 {
     if(pos < 0 or pos > 59)
         pos = 0;
@@ -71,7 +43,7 @@ QLabel * MainWindow::get_sec(int pos)
     return s_label[pos];
 }
 
-QLabel * MainWindow::get_min(int pos)
+QLabel * MainWindow::getMin(int pos)
 {
     if(pos < 0 or pos > 11)
         pos = 0;
@@ -81,16 +53,85 @@ QLabel * MainWindow::get_min(int pos)
     return m_label[pos];
 }
 
+void MainWindow::applyGeometry(int w, int h)
+{
+    double prop = w/h;
+    double dot_size = prop * 24;
+    //old
+    //double r = w/4.5;
+
+    double r = h/2 - dot_size*3;
+    double a = w/2;
+    double b = h/2;
+    double s_rad = 6 * M_PI /180;
+
+    //old
+    //double l_w = w/2.9;
+    //double l_h = h/2.9;
+
+    double l_w = h - h/4;
+    double l_h = h/prop - h/prop/4;
+
+    ui->lcd_time->setGeometry(w/2-l_w/2,h/2-l_h/2,l_w,l_h);
+
+    for(int i=0; i<60; i++)
+        if(i>=15)
+            getSec(i)->setGeometry(a + r * cos(s_rad * (i-15)) - 8, b + r * sin(s_rad * (i-15)) - 8, dot_size, dot_size);
+        else
+            getSec(i)->setGeometry(a + r * cos(s_rad * (i + 45)) - 8, b + r * sin(s_rad * (i + 45)) - 8, dot_size, dot_size);
+
+    for(int i=0; i<12; i++)
+        if(i>=3)
+            getMin(i)->setGeometry(a + (r + dot_size*2) * cos(s_rad * (i-3) * 5) - dot_size/2, b + (r + dot_size*2) * sin(s_rad * (i-3) * 5) - dot_size/2, dot_size, dot_size);
+        else
+            getMin(i)->setGeometry(a + (r + dot_size*2) * cos(s_rad * (i+9) * 5) - dot_size/2, b + (r + dot_size*2) * sin(s_rad * (i+9) * 5) - dot_size/2, dot_size, dot_size);
+
+    QTime currentTime = QTime::currentTime();
+    /*
+    for(int i = 11; i > (int)currentTime.minute()/5; i--)
+        get_min(i)->hide();
+    */
+
+    for(int i = 59; i >= currentTime.second(); i--)
+        if(i!=0)
+            getSec(i)->hide();
+}
+
 void MainWindow::updateTime()
 {
     QTime currentTime = QTime::currentTime();
-    QString currentTimeText = currentTime.toString("hh:mm");
+    int hour = currentTime.hour();
+    int minute = currentTime.minute();
+    string h_s;    
+
+    if(hour == 0)
+        hour = 12;
+
+    if(hour > 12)
+    {
+        hour -= 12;
+        h_s = " " + to_string(hour);
+    }else
+        h_s = "0" + to_string(hour);
+
+    string m_s;
+    if(minute < 10)
+        m_s = "0" + to_string(minute);
+    else
+        m_s = to_string(minute);
+
+    QString currentTimeText = "";
+    if(currentTime.msec() <= 500)
+        currentTimeText = QString::fromStdString(h_s + ":" + m_s);
+    else
+        currentTimeText = QString::fromStdString(h_s + " " + m_s);
+
     int s = currentTime.second();
     if(s == 0)
         for(int i = 1; i < 60; i++)
-            get_sec(i)->hide();
-    if (get_sec(s)->isHidden())
-        get_sec(s)->show();
+            getSec(i)->hide();
+    if (getSec(s)->isHidden())
+        getSec(s)->show();
 
     /*
     int m = currentTime.minute();

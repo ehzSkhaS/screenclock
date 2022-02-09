@@ -11,7 +11,6 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT;
-    //QLabel * s_label [60];
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -21,8 +20,9 @@ private:
     Ui::MainWindow *ui;
 
 private slots:
-    QLabel * get_sec(int pos);
-    QLabel * get_min(int pos);
-    void updateTime();
+    QLabel * getSec(int pos);
+    QLabel * getMin(int pos);
+    void applyGeometry(int w, int h);
+    void updateTime();    
 };
 #endif // MAINWINDOW_H

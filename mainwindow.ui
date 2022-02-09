@@ -77,6 +77,19 @@
   <property name="windowTitle">
    <string>ScreenClock</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="leyend.qrc">
+    <normaloff>:/logo</normaloff>
+    <normalon>:/logo</normalon>
+    <activeon>:/logo</activeon>
+    <selectedon>:/logo</selectedon>:/logo</iconset>
+  </property>
+  <property name="iconSize">
+   <size>
+    <width>96</width>
+    <height>96</height>
+   </size>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLCDNumber" name="lcd_time">
     <property name="geometry">
